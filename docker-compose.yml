@@ -1,0 +1,41 @@
+version: '3'
+services:
+  app:
+    build: docker/php
+    container_name: project_app
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - db
+  nginx:
+    image: nginx:1.21
+    container_name: project_nginx
+    ports:
+      - 26073:80
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/final-project.conf:/etc/nginx/conf.d/final-project.conf
+    depends_on:
+      - app
+  db:
+    platform: linux/x86_64
+    image: mysql:8.0.27
+    ports:
+      - 3306:3306
+    restart: always
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    container_name: project_mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: project_db
+      MYSQL_USER: project_user
+      MYSQL_PASSWORD: project_pwd
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - 26074:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=myadmin
